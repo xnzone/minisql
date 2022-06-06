@@ -19,6 +19,10 @@ type Nodemap struct {
 }
 
 func NewBPTree(fileName string, sizeOfKey int, degree int) *BPTree {
+	// 因为后面有拿children的数据，如果degree太小的话，remove时候会导致sibling为nil，所以这里degree必须要大于3
+	if degree < 3 {
+		degree = 3
+	}
 	bpt := &BPTree{
 		FileName:  fileName,
 		SizeOfKey: sizeOfKey,
