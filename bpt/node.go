@@ -29,6 +29,10 @@ func NewBPTreeNode(degree int, isLeaf bool) *BPTreeNode {
 	}
 }
 
+func (b *BPTreeNode) IsRoot() bool {
+	return b.Parent == nil
+}
+
 func (b *BPTreeNode) Search(key string) (bool, int) {
 	if b.Cnt == 0 {
 		return false, 0
