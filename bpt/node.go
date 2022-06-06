@@ -1,5 +1,10 @@
 package bpt
 
+import (
+	"fmt"
+	"os"
+)
+
 type BPTreeNode struct {
 	IsLeaf    bool          // 是否为叶子节点
 	Degree    int           // 节点度数
@@ -81,4 +86,63 @@ func (b *BPTreeNode) split() (string, *BPTreeNode) {
 	newNode.Parent = b.Parent
 	newNode.Cnt = b.Degree - minimal - 1
 	return key, newNode
+}
+
+// 增加非叶子节点记录
+func (b *BPTreeNode) AddNode(key string) int {
+	keyExist, index := b.Search(key)
+	if keyExist {
+		fmt.Println("key is not unique: ", key)
+		os.Exit(10)
+	}
+	for i := b.Cnt; i > index; i-- {
+		b.Keys[i] = b.Keys[i-1]
+		b.Children[i+1] = b.Children[i]
+	}
+	b.Keys[index] = key
+	b.Children[index+1] = nil
+	b.Cnt++
+	return index
+}
+
+// 增加叶子节点记录
+func (b *BPTreeNode) AddLeaf(key string, offset int) int {
+	keyExist, index := b.Search(key)
+	if keyExist {
+		fmt.Println("key is not unique: ", key)
+		os.Exit(10)
+	}
+	for i := b.Cnt; i > index; i-- {
+		b.Keys[i] = b.Keys[i-1]
+		b.KeyOffset[i] = b.KeyOffset[i-1]
+	}
+	b.Keys[index] = key
+	b.KeyOffset[index] = offset
+	b.Cnt++
+	return index
+}
+
+// 删除node中第index的key和children
+func (b *BPTreeNode) RemoveAt(index int) {
+	for i := index; i < b.Cnt-1; i++ {
+		b.Keys[i] = b.Keys[i+1]
+	}
+	if b.IsLeaf {
+		// 叶子节点
+		for i := index; i < b.Cnt-1; i++ {
+			b.KeyOffset[i] = b.KeyOffset[i+1]
+		}
+		// 多出来的空位，用默认值补
+		b.KeyOffset[b.Cnt-1] = 0
+		b.Keys[b.Cnt-1] = ""
+	} else {
+		// 非叶子节点
+		for i := index + 1; i < b.Cnt; i++ {
+			b.Children[i] = b.Children[i+1]
+		}
+		// 多出来的空位，用默认值补
+		b.Keys[b.Cnt-1] = ""
+		b.Children[b.Cnt] = nil
+	}
+	b.Cnt--
 }
