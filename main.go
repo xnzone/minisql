@@ -12,4 +12,6 @@ func main() {
 	bs := com.Int2Byte(a)
 	fmt.Println(bs)
 	fmt.Println(len(bs))
+	b := []byte("1")
+	fmt.Println(b)
 }

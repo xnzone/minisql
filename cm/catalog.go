@@ -27,9 +27,10 @@ func (b *CatalogManager) Load() {
 	}
 	brd := make([]byte, 1, 1)
 	var offset int64 = 0
-	for _, err = fd.ReadAt(brd, offset); err != io.EOF; {
+	_, err = fd.ReadAt(brd, offset)
+	for err != io.EOF {
 		offset += 1
-		if brd[0] == 1 {
+		if brd[0] == '1' {
 			// 读表格
 			var bt []byte
 			bt, offset = loadByte(fd, offset)
@@ -50,6 +51,7 @@ func (b *CatalogManager) Load() {
 				ColumnName: string(csb),
 			}
 		}
+		_, err = fd.ReadAt(brd, offset)
 	}
 	return
 }
@@ -61,28 +63,42 @@ func (b *CatalogManager) Save() {
 		fmt.Println("Open catalog file error: ", err.Error())
 		os.Exit(10)
 	}
+	var offset int64 = 0
 	for _, v := range b.tables {
-		_, _ = fd.Write([]byte{0})
+		_, _ = fd.WriteAt([]byte{'1'}, offset)
+		offset += 1
 		bs := v.Bytes()
-		a := len(bs)
-		_, _ = fd.Write(com.Int2Byte(a))
-		_, _ = fd.Write(bs)
+		ab := com.Int2Byte(len(bs))
+		_, _ = fd.WriteAt(ab, offset)
+		offset += 4
+		_, _ = fd.WriteAt(bs, offset)
+		offset += int64(len(bs))
 	}
 	// 如果有索引，写个0进去
 	for _, v := range b.Indices {
-		_, _ = fd.Write([]byte{0})
+		_, _ = fd.WriteAt([]byte{'0'}, offset)
+		offset += 1
 
 		isb := []byte(v.IndexName)
-		_, _ = fd.Write(com.Int2Byte(len(isb)))
-		_, _ = fd.Write(isb)
+		isbl := com.Int2Byte(len(isb))
+		_, _ = fd.WriteAt(isbl, offset)
+		offset += int64(len(isbl))
+		_, _ = fd.WriteAt(isb, offset)
+		offset += int64(len(isb))
 
 		tsb := []byte(v.TableName)
-		_, _ = fd.Write(com.Int2Byte(len(tsb)))
-		_, _ = fd.Write(tsb)
+		tsbl := com.Int2Byte(len(tsb))
+		_, _ = fd.WriteAt(tsbl, offset)
+		offset += int64(len(tsbl))
+		_, _ = fd.WriteAt(tsb, offset)
+		offset += int64(len(tsb))
 
 		csb := []byte(v.ColumnName)
-		_, _ = fd.Write(com.Int2Byte(len(csb)))
-		_, _ = fd.Write(csb)
+		csbl := com.Int2Byte(len(csb))
+		_, _ = fd.WriteAt(csbl, offset)
+		offset += int64(len(csbl))
+		_, _ = fd.WriteAt(csb, offset)
+		offset += int64(len(csb))
 	}
 }
 
@@ -143,7 +159,7 @@ func loadByte(fd *os.File, offset int64) ([]byte, int64) {
 	offset += int64(len(bld))
 	bln := com.Byte2Int(bld)
 	cld := make([]byte, bln, bln)
-	_, _ = fd.Read(cld)
+	_, _ = fd.ReadAt(cld, offset)
 	offset += int64(len(cld))
 	return cld, offset
 }
