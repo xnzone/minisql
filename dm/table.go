@@ -6,17 +6,17 @@ import (
 )
 
 type Table struct {
-	TableName     string         `json:"table_name"`
-	Columns       []*Column      `json:"columns"`
-	CMaps         map[string]int `json:"c_maps"`
-	BlockCnt      int            `json:"block_cnt"`
-	RecordSize    int            `json:"record_size"`
-	RecordInBlock int            `json:"record_in_block"`
+	TableName     string         `json:"tn"`
+	Columns       []*Column      `json:"col"`
+	CMaps         map[string]int `json:"cmap"`
+	BlockCnt      int            `json:"bcnt"`
+	RecordSize    int            `json:"rsz"`
+	RecordInBlock int            `json:"rib"`
 }
 
-func TransStrTable(str string) *Table {
+func TransByteTable(sb []byte) *Table {
 	var table *Table
-	_ = json.Unmarshal([]byte(str), &table)
+	_ = json.Unmarshal(sb, &table)
 	return table
 }
 
@@ -75,6 +75,10 @@ func (b *Table) Rib() int {
 }
 
 func (b *Table) String() string {
+	return string(b.Bytes())
+}
+
+func (b *Table) Bytes() []byte {
 	sb, _ := json.Marshal(b)
-	return string(sb)
+	return sb
 }

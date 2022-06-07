@@ -13,17 +13,17 @@ const (
 )
 
 type Column struct {
-	ColumnName   string      `json:"column_name"`
+	ColumnName   string      `json:"cn"`
 	Field        ColumnField `json:"field"`
-	IsPrimaryKey bool        `json:"is_primary_key"`
-	IsUnique     bool        `json:"is_unique"`
-	CharSize     int         `json:"char_size"`
-	Index        string      `json:"index"`
+	IsPrimaryKey bool        `json:"pkey"`
+	IsUnique     bool        `json:"uniq"`
+	CharSize     int         `json:"csz"`
+	Index        string      `json:"idx"`
 }
 
-func TransStrColumn(str string) *Column {
+func TransByteColumn(sb []byte) *Column {
 	var col *Column
-	_ = json.Unmarshal([]byte(str), &col)
+	_ = json.Unmarshal(sb, &col)
 	return col
 }
 
@@ -41,6 +41,10 @@ func (b *Column) Size() int {
 }
 
 func (b *Column) String() string {
+	return string(b.Bytes())
+}
+
+func (b *Column) Bytes() []byte {
 	bs, _ := json.Marshal(b)
-	return string(bs)
+	return bs
 }
