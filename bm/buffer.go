@@ -38,7 +38,7 @@ func (b *BufferManager) UndirtBlock(bid int) {
 	b.blocks[bid].IsDirty = false
 }
 
-func (b *BufferManager) Bread(fileName string, offset int) int {
+func (b *BufferManager) BRead(fileName string, offset int) int {
 	bid := b.getBlk(fileName, offset)
 	bp := b.blocks[bid]
 	if bp.UpToDate {
@@ -68,7 +68,7 @@ func (b *BufferManager) Bread(fileName string, offset int) int {
 	return bid
 }
 
-func (b *BufferManager) Bwrite(bid int) bool {
+func (b *BufferManager) BWrite(bid int) bool {
 	bp := b.blocks[bid]
 	fileName := getFileName(bp.FileName)
 	fd, err := os.OpenFile(fileName, os.O_RDWR, 0666)
@@ -90,24 +90,24 @@ func (b *BufferManager) Bwrite(bid int) bool {
 	return true
 }
 
-func (b *BufferManager) Brelease(bid int) {
+func (b *BufferManager) BRelease(bid int) {
 	bp := b.blocks[bid]
 	if bp.RefCnt <= 0 || bp.IsPinned {
 		return
 	}
 
 	if bp.IsDirty {
-		b.Bwrite(bid)
+		b.BWrite(bid)
 		bp.IsDirty = false
 	}
 	bp.RefCnt--
 }
 
-func (b *BufferManager) Baddr(bid int) []byte {
+func (b *BufferManager) BAddr(bid int) []byte {
 	return b.blocks[bid].Data
 }
 
-func (b *BufferManager) Bflush(fileName string) {
+func (b *BufferManager) BFlush(fileName string) {
 	for i := 0; i < BlockNum; i++ {
 		if b.blocks[i].FileName == fileName {
 			if b.blocks[i].RefCnt != 0 {
