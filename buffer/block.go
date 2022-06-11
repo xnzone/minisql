@@ -1,4 +1,4 @@
-package bm
+package buffer
 
 const (
 	BlockSize = 0x1000

@@ -1,9 +1,9 @@
-package cm
+package catalog
 
 import (
 	"fmt"
-	"github.com/xnzone/minisql/com"
-	"github.com/xnzone/minisql/dm"
+	"github.com/xnzone/minisql/database"
+	"github.com/xnzone/minisql/util"
 	"io"
 	"os"
 )
@@ -13,13 +13,13 @@ const (
 )
 
 type CatalogManager struct {
-	Indices map[string]*dm.Index
+	Indices map[string]*database.Index
 
-	tables map[string]*dm.Table
+	tables map[string]*database.Table
 }
 
 func (b *CatalogManager) Load() {
-	fd, err := os.OpenFile(catalogFile, os.O_RDONLY | os.O_CREATE, 0666)
+	fd, err := os.OpenFile(catalogFile, os.O_RDONLY|os.O_CREATE, 0666)
 	defer func() { _ = fd.Close() }()
 	if err != nil {
 		fmt.Println("Open catalog file error: ", err.Error())
@@ -34,7 +34,7 @@ func (b *CatalogManager) Load() {
 			// 读表格
 			var bt []byte
 			bt, offset = loadByte(fd, offset)
-			table := dm.TransByteTable(bt)
+			table := database.TransByteTable(bt)
 			if table == nil {
 				continue
 			}
@@ -45,9 +45,9 @@ func (b *CatalogManager) Load() {
 			isb, offset = loadByte(fd, offset)
 			tsb, offset = loadByte(fd, offset)
 			csb, offset = loadByte(fd, offset)
-			b.Indices[string(isb)] = &dm.Index{
-				IndexName: string(isb),
-				TableName: string(tsb),
+			b.Indices[string(isb)] = &database.Index{
+				IndexName:  string(isb),
+				TableName:  string(tsb),
 				ColumnName: string(csb),
 			}
 		}
@@ -68,7 +68,7 @@ func (b *CatalogManager) Save() {
 		_, _ = fd.WriteAt([]byte{'1'}, offset)
 		offset += 1
 		bs := v.Bytes()
-		ab := com.Int2Byte(len(bs))
+		ab := util.Int2Byte(len(bs))
 		_, _ = fd.WriteAt(ab, offset)
 		offset += 4
 		_, _ = fd.WriteAt(bs, offset)
@@ -80,21 +80,21 @@ func (b *CatalogManager) Save() {
 		offset += 1
 
 		isb := []byte(v.IndexName)
-		isbl := com.Int2Byte(len(isb))
+		isbl := util.Int2Byte(len(isb))
 		_, _ = fd.WriteAt(isbl, offset)
 		offset += int64(len(isbl))
 		_, _ = fd.WriteAt(isb, offset)
 		offset += int64(len(isb))
 
 		tsb := []byte(v.TableName)
-		tsbl := com.Int2Byte(len(tsb))
+		tsbl := util.Int2Byte(len(tsb))
 		_, _ = fd.WriteAt(tsbl, offset)
 		offset += int64(len(tsbl))
 		_, _ = fd.WriteAt(tsb, offset)
 		offset += int64(len(tsb))
 
 		csb := []byte(v.ColumnName)
-		csbl := com.Int2Byte(len(csb))
+		csbl := util.Int2Byte(len(csb))
 		_, _ = fd.WriteAt(csbl, offset)
 		offset += int64(len(csbl))
 		_, _ = fd.WriteAt(csb, offset)
@@ -102,17 +102,17 @@ func (b *CatalogManager) Save() {
 	}
 }
 
-func (b *CatalogManager) CreateTable(tableName string, columns []*dm.Column) {
-	b.tables[tableName] = &dm.Table{
+func (b *CatalogManager) CreateTable(tableName string, columns []*database.Column) {
+	b.tables[tableName] = &database.Table{
 		TableName: tableName,
-		Columns: columns,
+		Columns:   columns,
 	}
 }
 
 func (b *CatalogManager) CreateIndex(indexName string, tableName string, columnName string) {
-	b.Indices[indexName] = &dm.Index{
-		TableName: tableName,
-		IndexName: indexName,
+	b.Indices[indexName] = &database.Index{
+		TableName:  tableName,
+		IndexName:  indexName,
 		ColumnName: columnName,
 	}
 	table := b.tables[tableName]
@@ -145,11 +145,11 @@ func (b *CatalogManager) ValidName(name string) bool {
 	return b.tables[name] == nil && b.Indices[name] == nil
 }
 
-func (b *CatalogManager) GetTable(tableName string) *dm.Table {
+func (b *CatalogManager) GetTable(tableName string) *database.Table {
 	return b.tables[tableName]
 }
 
-func (b *CatalogManager) GetIndex(indexName string) *dm.Index {
+func (b *CatalogManager) GetIndex(indexName string) *database.Index {
 	return b.Indices[indexName]
 }
 
@@ -157,7 +157,7 @@ func loadByte(fd *os.File, offset int64) ([]byte, int64) {
 	bld := make([]byte, 4, 4)
 	_, _ = fd.ReadAt(bld, offset)
 	offset += int64(len(bld))
-	bln := com.Byte2Int(bld)
+	bln := util.Byte2Int(bld)
 	cld := make([]byte, bln, bln)
 	_, _ = fd.ReadAt(cld, offset)
 	offset += int64(len(cld))

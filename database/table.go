@@ -1,8 +1,8 @@
-package dm
+package database
 
 import (
 	"encoding/json"
-	"github.com/xnzone/minisql/bm"
+	"github.com/xnzone/minisql/buffer"
 )
 
 type Table struct {
@@ -70,7 +70,7 @@ func (b *Table) Rib() int {
 	if b.RecordInBlock > 0 {
 		return b.RecordInBlock
 	}
-	b.RecordInBlock = bm.BlockSize / (b.Size() + 1)
+	b.RecordInBlock = buffer.BlockSize / (b.Size() + 1)
 	return b.RecordInBlock
 }
 

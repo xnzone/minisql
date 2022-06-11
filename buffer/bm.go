@@ -1,4 +1,4 @@
-package bm
+package buffer
 
 var (
 	bmgr *BufferManager

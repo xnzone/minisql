@@ -1,4 +1,4 @@
-package dm
+package database
 
 type Index struct {
 	IndexName  string

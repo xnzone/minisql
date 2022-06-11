@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/xnzone/minisql/com"
+	"github.com/xnzone/minisql/util"
 )
 
 func main() {
 	fmt.Println("hello world")
-	//fmt.Println(com.SizeOf(100))
+	//fmt.Println(util.SizeOf(100))
 	a := 100000000
-	bs := com.Int2Byte(a)
+	bs := util.Int2Byte(a)
 	fmt.Println(bs)
 	fmt.Println(len(bs))
 	b := []byte("1")

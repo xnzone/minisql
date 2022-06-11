@@ -1,4 +1,4 @@
-package bpt
+package bptree
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 func TestBPTree_Find(t *testing.T) {
 	size := -2
-	bpt := NewBPTree("bpt", size, size+4)
+	bpt := NewBPTree("bptree", size, size+4)
 	for i := 0; i < 3; i++ {
 		bpt.Insert(fmt.Sprintf("bpt_%d", i), i)
 	}
