@@ -133,7 +133,7 @@ func (b *BPTree) Remove(key string) bool {
 	if res.Node.IsRoot() { //要删的结点是根的话
 		res.Node.RemoveAt(res.Index) //删除根结点中的一个index
 		b.KeyCount--
-		return b.cascadeDelete(res.Node)
+		return b.CascadeDelete(res.Node)
 	} else { //要删的结点不是根
 		if res.Index == 0 && b.Head != res.Node {
 			// cascadingly update parent node
@@ -149,11 +149,11 @@ func (b *BPTree) Remove(key string) bool {
 			currentParent.Keys[index] = res.Node.Keys[1]
 			res.Node.RemoveAt(res.Index)
 			b.KeyCount--
-			return b.cascadeDelete(res.Node)
+			return b.CascadeDelete(res.Node)
 		} else {
 			res.Node.RemoveAt(res.Index)
 			b.KeyCount--
-			return b.cascadeDelete(res.Node)
+			return b.CascadeDelete(res.Node)
 		}
 	}
 }
@@ -182,7 +182,7 @@ func (b *BPTree) cascadeInsert(node *BPTreeNode) {
 	}
 }
 
-func (b *BPTree) cascadeDelete(node *BPTreeNode) bool {
+func (b *BPTree) CascadeDelete(node *BPTreeNode) bool {
 	minimal, minimalBranch := b.Degree/2, (b.Degree-1)/2
 	if (node.IsLeaf && node.Cnt >= minimal) || (node.IsRoot() && node.Cnt > 0) || (!node.IsLeaf && !node.IsRoot() && node.Cnt >= minimal) {
 		return true // no need to update
@@ -292,7 +292,7 @@ func (b *BPTree) deleteLeafLR(node *BPTreeNode, parent *BPTreeNode, sibling *BPT
 	sibling.Sibling = node.Sibling
 	node = nil
 	b.NodeCount--
-	return b.cascadeDelete(parent)
+	return b.CascadeDelete(parent)
 }
 
 func (b *BPTree) deleteLeafRL(node *BPTreeNode, parent *BPTreeNode, sibling *BPTreeNode, index int) bool {
@@ -326,7 +326,7 @@ func (b *BPTree) deleteLeafRR(node *BPTreeNode, parent *BPTreeNode, sibling *BPT
 	node.Sibling = sibling.Sibling
 	sibling = nil
 	b.NodeCount--
-	return b.cascadeDelete(parent)
+	return b.CascadeDelete(parent)
 }
 
 func (b *BPTree) deleteBranchLL(node *BPTreeNode, parent *BPTreeNode, sibling *BPTreeNode, index int) bool {
@@ -361,7 +361,7 @@ func (b *BPTree) deleteBranchLR(node *BPTreeNode, parent *BPTreeNode, sibling *B
 	sibling.Cnt += node.Cnt
 	node = nil
 	b.NodeCount--
-	return b.cascadeDelete(parent)
+	return b.CascadeDelete(parent)
 }
 func (b *BPTree) deleteBranchRL(node *BPTreeNode, parent *BPTreeNode, sibling *BPTreeNode, index int) bool {
 	sibling.Children[0].Parent = node
@@ -397,5 +397,5 @@ func (b *BPTree) deleteBranchRR(node *BPTreeNode, parent *BPTreeNode, sibling *B
 	node.Cnt += sibling.Cnt
 	sibling = nil
 	b.NodeCount--
-	return b.cascadeDelete(parent)
+	return b.CascadeDelete(parent)
 }
