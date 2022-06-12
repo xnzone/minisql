@@ -95,11 +95,13 @@ func bwrite(bp *Block) bool {
 func bread(fileName string, bid int) *Block {
 	key := fileNameKey(fileName, bid)
 	val, _, exist := blockCache.Get(key)
-	bp := val.(*Block)
-	if exist && bp != nil && bp.UpToDate {
-		return bp
+	if exist {
+		bp := val.(*Block)
+		if bp != nil && bp.UpToDate {
+			return bp
+		}
 	}
-	bp = NewBlock()
+	bp := NewBlock()
 	bp.Bid = bid
 	bp.FileName = fileName
 	blockCache.Set(key, bp, 0)
