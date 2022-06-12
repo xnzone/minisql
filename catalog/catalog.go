@@ -12,49 +12,80 @@ const (
 	catalogFile = "catalog.minisql"
 )
 
-type CatalogManager struct {
-	Indices map[string]*database.Index
-
-	tables map[string]*database.Table
+type Catalog struct {
+	indices map[string]*database.Index // index
+	tables  map[string]*database.Table // table
 }
 
-func Init() {
+var (
+	cm *Catalog
+)
 
+func Init() {
+	cm = &Catalog{
+		indices: make(map[string]*database.Index),
+		tables:  make(map[string]*database.Table),
+	}
+	cm.load()
+}
+
+func Flush() {
+	cm.save()
 }
 
 func ExistTable(tableName string) bool {
-	return false
+	return cm.tables[tableName] != nil
 }
 
 func GetTable(tableName string) *database.Table {
-	return nil
+	return cm.tables[tableName]
 }
 
 func NewTable(tableName string, columns []*database.Column) {
-
+	table := &database.Table{
+		TableName: tableName,
+		Columns:   columns,
+	}
+	cm.tables[tableName] = table
 }
 
 func ExistIndex(indexName string) bool {
-	return false
+	return cm.indices[indexName] != nil
 }
 
 func NewIndex(indexName, tableName, columnName string) {
-
+	cm.indices[indexName] = &database.Index{
+		TableName:  tableName,
+		IndexName:  indexName,
+		ColumnName: columnName,
+	}
+	table := cm.tables[tableName]
+	index := table.IndexOfColumn(columnName)
+	column := table.Columns[index]
+	column.Index = indexName
 }
 
 func DropTable(tableName string) {
-
+	delete(cm.tables, tableName)
 }
 
 func GetIndex(indexName string) *database.Index {
-	return nil
+	return cm.indices[indexName]
 }
 
 func DropIndex(indexName string) {
-
+	index := cm.indices[indexName]
+	defer delete(cm.indices, indexName)
+	table := cm.tables[index.TableName]
+	ioc := table.IndexOfColumn(index.ColumnName)
+	table.Columns[ioc].Index = ""
 }
 
-func (b *CatalogManager) Load() {
+func ValidName(name string) bool {
+	return cm.tables[name] == nil && cm.indices[name] == nil
+}
+
+func (b *Catalog) load() {
 	fd, err := os.OpenFile(catalogFile, os.O_RDONLY|os.O_CREATE, 0666)
 	defer func() { _ = fd.Close() }()
 	if err != nil {
@@ -79,7 +110,7 @@ func (b *CatalogManager) Load() {
 			isb, offset = loadByte(fd, offset)
 			tsb, offset = loadByte(fd, offset)
 			csb, offset = loadByte(fd, offset)
-			b.Indices[string(isb)] = &database.Index{
+			b.indices[string(isb)] = &database.Index{
 				IndexName:  string(isb),
 				TableName:  string(tsb),
 				ColumnName: string(csb),
@@ -90,7 +121,7 @@ func (b *CatalogManager) Load() {
 	return
 }
 
-func (b *CatalogManager) Save() {
+func (b *Catalog) save() {
 	fd, err := os.OpenFile(catalogFile, os.O_RDWR, 0666)
 	defer func() { _ = fd.Close() }()
 	if err != nil {
@@ -109,7 +140,7 @@ func (b *CatalogManager) Save() {
 		offset += int64(len(bs))
 	}
 	// 如果有索引，写个0进去
-	for _, v := range b.Indices {
+	for _, v := range b.indices {
 		_, _ = fd.WriteAt([]byte{'0'}, offset)
 		offset += 1
 
@@ -134,57 +165,6 @@ func (b *CatalogManager) Save() {
 		_, _ = fd.WriteAt(csb, offset)
 		offset += int64(len(csb))
 	}
-}
-
-func (b *CatalogManager) CreateTable(tableName string, columns []*database.Column) {
-	b.tables[tableName] = &database.Table{
-		TableName: tableName,
-		Columns:   columns,
-	}
-}
-
-func (b *CatalogManager) CreateIndex(indexName string, tableName string, columnName string) {
-	b.Indices[indexName] = &database.Index{
-		TableName:  tableName,
-		IndexName:  indexName,
-		ColumnName: columnName,
-	}
-	table := b.tables[tableName]
-	index := table.IndexOfColumn(columnName)
-	column := table.Columns[index]
-	column.Index = indexName
-}
-
-func (b *CatalogManager) DropTable(tableName string) {
-	delete(b.tables, tableName)
-}
-
-func (b *CatalogManager) DropIndex(indexName string) {
-	index := b.Indices[indexName]
-	defer delete(b.Indices, indexName)
-	table := b.tables[index.TableName]
-	ioc := table.IndexOfColumn(index.ColumnName)
-	table.Columns[ioc].Index = ""
-}
-
-func (b *CatalogManager) ExistTable(tableName string) bool {
-	return b.tables[tableName] != nil
-}
-
-func (b *CatalogManager) ExistIndex(indexName string) bool {
-	return b.Indices[indexName] != nil
-}
-
-func (b *CatalogManager) ValidName(name string) bool {
-	return b.tables[name] == nil && b.Indices[name] == nil
-}
-
-func (b *CatalogManager) GetTable(tableName string) *database.Table {
-	return b.tables[tableName]
-}
-
-func (b *CatalogManager) GetIndex(indexName string) *database.Index {
-	return b.Indices[indexName]
 }
 
 func loadByte(fd *os.File, offset int64) ([]byte, int64) {
