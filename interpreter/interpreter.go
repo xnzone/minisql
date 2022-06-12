@@ -46,7 +46,7 @@ func getCmdStr() string {
 		cmd += " "
 		fmt.Print("    -> ")
 	}
-	return cmd
+	return strings.TrimSpace(cmd)
 }
 
 func tokenizer(str string) []string {
@@ -98,7 +98,7 @@ func parse(strvec []string) {
 	case "execfile":
 		_ = parseExec(strvec)
 	case "quit", "exit":
-		// TODO 数据落盘
+		api.Flush()
 		os.Exit(0)
 	default:
 		fmt.Println("ERROR: You have an error in your SQL syntax; cmd is not supported now.")
@@ -151,6 +151,10 @@ func handleSpecial(b []byte) []byte {
 	nb := make([]byte, 0, len(b))
 	for i := 0; i < len(b); i++ {
 		if b[i] == '*' || b[i] == '=' || b[i] == ',' || b[i] == '(' || b[i] == ')' || b[i] == '<' || b[i] == '>' || b[i] == ';' {
+			if nb[len(nb) - 1] == ' ' {
+				nb = append(nb, b[i])
+				continue
+			}
 			if i > 0 && i < len(b)-1 && b[i-1] != ' ' && b[i+1] != ' ' {
 				nb = append(nb, []byte{' ', b[i], ' '}...)
 				continue

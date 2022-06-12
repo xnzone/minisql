@@ -5,6 +5,7 @@ import (
 	"github.com/xnzone/minisql/api"
 	"github.com/xnzone/minisql/database"
 	"go/constant"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -32,7 +33,6 @@ func parseCreateTable(strvec []string) error {
 		column := &database.Column{
 			ColumnName: columnName,
 		}
-		i++
 		if columnName == primaryKey {
 			hasPrimaryKey = true
 			column.IsPrimaryKey = true
@@ -47,7 +47,10 @@ func parseCreateTable(strvec []string) error {
 			i++
 		} else if strvec[i] == "char" {
 			column.Field = constant.String
-			i++
+			i += 2
+			cs, _ := strconv.ParseInt(strvec[i], 10, 64)
+			column.CharSize = int(cs)
+			i += 2
 		} else {
 			fmt.Printf("ERROR: You have an error in your SQL syntax; the type %s is not defined.\n", strvec[i])
 			return fmt.Errorf("column type not defined")

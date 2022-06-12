@@ -17,6 +17,10 @@ func Init() {
 	record.Init()  // 初始化记录
 }
 
+func Flush() {
+	catalog.Flush()
+}
+
 func CreateTable(tableName string, columns []*database.Column, primaryKey string) {
 	if ExistTable(tableName) {
 		fmt.Printf("ERROR: You have an error in your SQL syntax; table named %s already exist.\n", tableName)
