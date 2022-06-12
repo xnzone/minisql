@@ -1,5 +1,7 @@
 package buffer
 
+import "os"
+
 var (
 	bmgr *BufferManager
 )
@@ -26,4 +28,8 @@ func BRelease(bid int) {
 
 func BWrite(bid int) bool {
 	return bmgr.BWrite(bid)
+}
+
+func BRemove(fileName string) {
+	_ = os.Remove(getFileName(fileName))
 }

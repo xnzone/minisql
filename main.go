@@ -1,6 +1,8 @@
 package main
 
-import "github.com/xnzone/minisql/interpreter"
+import (
+	"github.com/xnzone/minisql/interpreter"
+)
 
 func main() {
 	app := interpreter.Init()

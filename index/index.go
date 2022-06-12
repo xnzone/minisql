@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/xnzone/minisql/bptree"
 	"github.com/xnzone/minisql/database"
+	"go/constant"
 )
 
 type IndexManager struct {
@@ -20,6 +21,17 @@ func CreateIndex(table *database.Table, indexName, columnName string) {
 
 func DropIndex(table *database.Table, indexName, columnName string) {
 
+}
+
+func InsertIndex(table *database.Table, indexName, columnName string, val constant.Value, offset int) {
+
+}
+func DeleteIndex(table *database.Table, indexName, columnName string, val constant.Value) {
+
+}
+
+func FindIndex(table *database.Table, indexName, columnName string, val constant.Value) int {
+	return 0
 }
 
 func NewIndexManager() *IndexManager {

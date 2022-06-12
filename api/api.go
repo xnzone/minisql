@@ -146,7 +146,7 @@ func Select(tableName string, conds []*database.Condition) {
 		}
 	}
 	result := record.SelectRecord(table, conds)
-	print(table.Columns, result)
+	printRecord(table.Columns, result)
 }
 
 func SelectAll(tableName string) {
@@ -159,7 +159,7 @@ func SelectAll(tableName string) {
 		return
 	}
 	result := record.SelectAll(table)
-	print(table.Columns, result)
+	printRecord(table.Columns, result)
 }
 
 func ExistTable(tableName string) bool {
