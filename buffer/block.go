@@ -2,6 +2,7 @@ package buffer
 
 const (
 	BlockSize = 0x1000
+	BlockNum  = 0x1000
 )
 
 type Block struct {
@@ -10,7 +11,7 @@ type Block struct {
 	IsDirty  bool
 	UpToDate bool
 	FileName string
-	Offset   int
+	Bid      int
 	RefCnt   int
 }
 
@@ -21,7 +22,7 @@ func NewBlock() *Block {
 		IsPinned: false,
 		UpToDate: false,
 		FileName: "",
-		Offset:   0,
+		Bid:      0,
 		RefCnt:   0,
 	}
 }

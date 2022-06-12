@@ -23,9 +23,8 @@ func CreateTable(table *database.Table) {
 	if table == nil {
 		return
 	}
-	bid := buffer.BRead(table.TableName, 0)
-	buffer.BWrite(bid)
-	buffer.BRelease(bid)
+	_ = buffer.BAddr(table.TableName, 0)
+	buffer.BRelease(table.TableName, 0)
 	table.BlockCnt = 1
 }
 
@@ -62,28 +61,24 @@ func InsertRecord(table *database.Table, values []constant.Value) {
 	}
 
 	blockCnt := table.BlockCnt
-	bid := buffer.BRead(table.TableName, blockCnt-1) // 插入到最后一页
-	data := buffer.BAddr(bid)
+	data := buffer.BAddr(table.TableName, blockCnt-1) // 插入到最后一页
 	size := table.Size() + 1
 
 	for offset := 0; offset < buffer.BlockSize; offset += size {
 		if data[offset] == 0 && offset+size <= buffer.BlockSize {
 			putRecord(table, values, data, offset)
 			updateIndex(table, values, 0, (blockCnt-1)*table.Rib()+offset/size)
-			buffer.BWrite(bid)
-			buffer.BRelease(bid)
+			buffer.BRelease(table.TableName, blockCnt-1)
 			return
 		}
 	}
 	// 说明没有空闲空间了，重新分配一个新页面
-	buffer.BRelease(bid)
+	buffer.BRelease(table.TableName, blockCnt-1)
 	table.BlockCnt += 1
-	bid = buffer.BRead(table.TableName, table.BlockCnt-1)
-	data = buffer.BAddr(bid)
+	data = buffer.BAddr(table.TableName, table.BlockCnt-1)
 	putRecord(table, values, data, 0)
 	updateIndex(table, values, 0, (table.BlockCnt-1)*table.Rib())
-	buffer.BWrite(bid)
-	buffer.BRelease(bid)
+	buffer.BRelease(table.TableName, table.BlockCnt-1)
 }
 
 func DeleteRecord(table *database.Table, conds []*database.Condition) {
@@ -95,13 +90,11 @@ func DeleteRecord(table *database.Table, conds []*database.Condition) {
 	}
 	v := selectPos(table, conds)
 	for _, pc := range v {
-		bid := buffer.BRead(table.TableName, pc.first)
-		data := buffer.BAddr(bid)
+		data := buffer.BAddr(table.TableName, pc.first)
 		res := getRecord(table, data, pc.second)
 		updateIndex(table, res, 1, 0)
 		data[pc.second] = 0
-		buffer.BWrite(bid)
-		buffer.BRelease(bid)
+		buffer.BRelease(table.TableName, pc.first)
 	}
 }
 
@@ -120,11 +113,10 @@ func SelectRecord(table *database.Table, conds []*database.Condition) [][]consta
 	}
 	v := selectPos(table, conds)
 	for _, pc := range v {
-		bid := buffer.BRead(table.TableName, pc.first)
-		data := buffer.BAddr(bid)
+		data := buffer.BAddr(table.TableName, pc.first)
 		_ = data
 		res = append(res, getRecord(table, data, pc.second))
-		buffer.BRelease(bid)
+		buffer.BRelease(table.TableName, pc.first)
 	}
 	return res
 }
@@ -169,19 +161,18 @@ func checkUnique(table *database.Table, columnId int, val constant.Value) bool {
 
 	blockCnt := table.BlockCnt
 	for i := 0; i < blockCnt; i++ {
-		bid := buffer.BRead(table.TableName, i)
-		data := buffer.BAddr(bid)
+		data := buffer.BAddr(table.TableName, i)
 		size := table.Size() + 1
 		for offset := 0; offset < buffer.BlockSize; offset += size {
 			if data[offset] == 1 {
 				vals := getRecord(table, data, offset)
 				if constant.Compare(vals[columnId], token.EQL, val) {
-					buffer.BRelease(bid)
+					buffer.BRelease(table.TableName, i)
 					return false
 				}
 			}
 		}
-		buffer.BRelease(bid)
+		buffer.BRelease(table.TableName, i)
 	}
 	return true
 }
@@ -288,8 +279,7 @@ func selectPos(table *database.Table, conds []*database.Condition) []piece {
 	if !flag {
 		blockCnt := table.BlockCnt
 		for i := 0; i < blockCnt; i++ {
-			bid := buffer.BRead(table.TableName, i)
-			data := buffer.BAddr(bid)
+			data := buffer.BAddr(table.TableName, i)
 			size := table.Size() + 1
 			for offset := 0; offset < buffer.BlockSize && offset+size < buffer.BlockSize; offset += size {
 				if data[offset] == 0 {
@@ -311,7 +301,7 @@ func selectPos(table *database.Table, conds []*database.Condition) []piece {
 					})
 				}
 			}
-			buffer.BRelease(bid)
+			buffer.BRelease(table.TableName, i)
 		}
 	}
 	return v

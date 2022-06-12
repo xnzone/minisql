@@ -39,8 +39,7 @@ func CreateIndex(table *database.Table, indexName, columnName string) {
 	tree.Head = tree.Root
 
 	for i := 0; i < table.BlockCnt; i++ {
-		bid := buffer.BRead(table.TableName, i)
-		data := buffer.BAddr(bid)
+		data := buffer.BAddr(table.TableName, i)
 		offset := 0
 		for j := 0; j < numRecord; j++ {
 			if data[offset] == 0 {

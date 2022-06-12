@@ -51,7 +51,7 @@ func NewTable(tableName string, columns []*database.Column) {
 	table := &database.Table{
 		TableName: tableName,
 		Columns:   columns,
-		CMaps:   make(map[string]int),
+		CMaps:     make(map[string]int),
 	}
 	cm.tables[tableName] = table
 }
