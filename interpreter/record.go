@@ -85,6 +85,7 @@ func parseDelete(strvec []string) error {
 			return err
 		}
 		conds = append(conds, cond)
+		i += 2
 	}
 	start := time.Now().Unix()
 	api.DeleteFrom(tableName, conds)
@@ -114,7 +115,7 @@ func parseSelect(strvec []string) error {
 		return nil
 	}
 
-	if strvec[4] == "where" {
+	if strvec[4] != "where" {
 		fmt.Println("ERROR: You have an error in your SQL syntax;you can use 'select * from TABLENAME;' or 'select * from TABLENAME where (CON1 and COND2 ..); to select'")
 		return fmt.Errorf("select sql error")
 	}
@@ -133,6 +134,7 @@ func parseSelect(strvec []string) error {
 			return err
 		}
 		conds = append(conds, cond)
+		i += 2
 	}
 	start := time.Now().Unix()
 	api.Select(tableName, conds)
@@ -156,7 +158,7 @@ func handleColumnCond(table *database.Table, strvec []string, i int) (*database.
 	var v constant.Value
 	var j int
 	for j = 0; j < len(table.Columns); j++ {
-		if table.Columns[i].ColumnName == columnName {
+		if table.Columns[j].ColumnName == columnName {
 			break
 		}
 	}
@@ -215,7 +217,10 @@ func handleColumnField(column *database.Column, str string) (constant.Value, err
 		va, _ := strconv.ParseFloat(str, 10)
 		v = constant.MakeFloat64(va)
 	case constant.String:
-		v = constant.MakeString(strings.TrimSpace(str))
+		str = strings.Trim(str, "'")
+		b := make([]byte, column.Size())
+		copy(b, str)
+		v = constant.MakeString(string(b))
 	default:
 		fmt.Println("ERROR: You have an error in your SQL syntax;column field not support")
 		return v, fmt.Errorf("column not support")

@@ -12,8 +12,8 @@ import (
 
 func Init() {
 	buffer.Init()  // buffer最先初始化
-	catalog.Init() // 初始化目录
 	index.Init()   // 初始化索引
+	catalog.Init() // 初始化目录
 	record.Init()  // 初始化记录
 }
 
@@ -183,20 +183,22 @@ func printRecord(columns []*database.Column, result [][]constant.Value) {
 		return
 	}
 	for _, column := range columns {
-		fmt.Print(column.ColumnName)
+		fmt.Printf("%s\t|", column.ColumnName)
 	}
 	fmt.Println()
 	for _, res := range result {
 		for i, col := range res {
 			switch columns[i].Field {
 			case constant.Int:
-				fmt.Print(constant.Int64Val(col))
+				va, _ := constant.Int64Val(col)
+				fmt.Printf("%d\t|", va)
 			case constant.Float:
-				fmt.Print(constant.Float64Val(col))
+				va, _ := constant.Float64Val(col)
+				fmt.Printf("%f\t|", va)
 			case constant.String:
-				fmt.Print(constant.StringVal(col))
+				fmt.Printf("%s\t|", constant.StringVal(col))
 			default:
-				fmt.Print(constant.StringVal(col))
+				fmt.Printf("%s\t|", constant.StringVal(col))
 			}
 		}
 		fmt.Println()

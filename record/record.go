@@ -146,6 +146,7 @@ func checkType(col *database.Column, val constant.Value) bool {
 		_, res = constant.Float64Val(val)
 	case constant.String:
 		_ = constant.StringVal(val)
+		res = true
 	default:
 		return false
 	}

@@ -3,6 +3,7 @@ package catalog
 import (
 	"fmt"
 	"github.com/xnzone/minisql/database"
+	"github.com/xnzone/minisql/index"
 	"github.com/xnzone/minisql/util"
 	"io"
 	"os"
@@ -27,6 +28,11 @@ func Init() {
 		tables:  make(map[string]*database.Table),
 	}
 	cm.load()
+	// 建立索引
+	for _, idx := range cm.indices {
+		table := GetTable(idx.TableName)
+		index.CreateIndex(table, idx.IndexName, idx.ColumnName)
+	}
 }
 
 func Flush() {
