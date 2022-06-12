@@ -14,10 +14,8 @@ type Table struct {
 	RecordInBlock int            `json:"rib"`
 }
 
-func TransByteTable(sb []byte) *Table {
-	var table *Table
-	_ = json.Unmarshal(sb, &table)
-	return table
+func (b *Table) TransByteTable(sb []byte) {
+	_ = json.Unmarshal(sb, &b)
 }
 
 func (b *Table) HasColumn(columnName string) bool {

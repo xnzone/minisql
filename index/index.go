@@ -10,6 +10,18 @@ type IndexManager struct {
 	TreeMap map[string]*bptree.BPTree
 }
 
+func Init() {
+
+}
+
+func CreateIndex(table *database.Table, indexName, columnName string) {
+
+}
+
+func DropIndex(table *database.Table, indexName, columnName string) {
+
+}
+
 func NewIndexManager() *IndexManager {
 	return &IndexManager{}
 }

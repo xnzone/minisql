@@ -18,6 +18,42 @@ type CatalogManager struct {
 	tables map[string]*database.Table
 }
 
+func Init() {
+
+}
+
+func ExistTable(tableName string) bool {
+	return false
+}
+
+func GetTable(tableName string) *database.Table {
+	return nil
+}
+
+func NewTable(tableName string, columns []*database.Column) {
+
+}
+
+func ExistIndex(indexName string) bool {
+	return false
+}
+
+func NewIndex(indexName, tableName, columnName string) {
+
+}
+
+func DropTable(tableName string) {
+
+}
+
+func GetIndex(indexName string) *database.Index {
+	return nil
+}
+
+func DropIndex(indexName string) {
+
+}
+
 func (b *CatalogManager) Load() {
 	fd, err := os.OpenFile(catalogFile, os.O_RDONLY|os.O_CREATE, 0666)
 	defer func() { _ = fd.Close() }()
@@ -34,10 +70,8 @@ func (b *CatalogManager) Load() {
 			// 读表格
 			var bt []byte
 			bt, offset = loadByte(fd, offset)
-			table := database.TransByteTable(bt)
-			if table == nil {
-				continue
-			}
+			table := &database.Table{}
+			table.TransByteTable(bt)
 			b.tables[table.TableName] = table
 		} else {
 			// 读索引

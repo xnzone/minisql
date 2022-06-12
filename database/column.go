@@ -2,38 +2,29 @@ package database
 
 import (
 	"encoding/json"
-)
-
-type ColumnField int
-
-const (
-	ColumnFieldInt ColumnField = iota
-	ColumnFieldFloat
-	ColumnFieldChar
+	"go/constant"
 )
 
 type Column struct {
-	ColumnName   string      `json:"cn"`
-	Field        ColumnField `json:"field"`
-	IsPrimaryKey bool        `json:"pkey"`
-	IsUnique     bool        `json:"uniq"`
-	CharSize     int         `json:"csz"`
-	Index        string      `json:"idx"`
+	ColumnName   string        `json:"cn"`
+	Field        constant.Kind `json:"field"`
+	IsPrimaryKey bool          `json:"pkey"`
+	IsUnique     bool          `json:"uniq"`
+	CharSize     int           `json:"csz"`
+	Index        string        `json:"idx"`
 }
 
-func TransByteColumn(sb []byte) *Column {
-	var col *Column
-	_ = json.Unmarshal(sb, &col)
-	return col
+func (b *Column) TransByteColumn(sb []byte) {
+	_ = json.Unmarshal(sb, &b)
 }
 
 func (b *Column) Size() int {
 	switch b.Field {
-	case ColumnFieldInt:
+	case constant.Int:
 		return 4
-	case ColumnFieldFloat:
+	case constant.Float:
 		return 4
-	case ColumnFieldChar:
+	case constant.String:
 		return b.CharSize + 1
 	default:
 		return b.CharSize + 1
