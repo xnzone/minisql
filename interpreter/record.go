@@ -66,7 +66,7 @@ func parseDelete(strvec []string) error {
 		return nil
 	}
 
-	if strvec[3] == "where" {
+	if strvec[3] != "where" {
 		fmt.Println("ERROR: You have an error in your SQL syntax;you can use 'delete from TABLENAME;' or 'delete from TABLENAME where (CON1 and COND2 ..); to delete'")
 		return fmt.Errorf("delete sql error")
 	}
@@ -77,7 +77,7 @@ func parseDelete(strvec []string) error {
 	}
 
 	table := api.GetTable(tableName)
-	for i := 4; i < vecSize; {
+	for i := 5; i < vecSize - 1; {
 		var cond *database.Condition
 		var err error
 		cond, i, err = handleColumnCond(table, strvec, i)
@@ -126,7 +126,7 @@ func parseSelect(strvec []string) error {
 	}
 
 	table := api.GetTable(tableName)
-	for i := 5; i < vecSize; {
+	for i := 6; i < vecSize - 1; {
 		var cond *database.Condition
 		var err error
 		cond, i, err = handleColumnCond(table, strvec, i)

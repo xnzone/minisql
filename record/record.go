@@ -55,7 +55,7 @@ func InsertRecord(table *database.Table, values []constant.Value) {
 		}
 		// 检查唯一索引
 		if attrs[i].IsUnique && !checkUnique(table, i, values[i]) {
-			fmt.Printf("Insert failed, attribute %s type error!\n", attrs[i].ColumnName)
+			fmt.Printf("Insert failed, attribute %s unique confilct error!\n", attrs[i].ColumnName)
 			return
 		}
 	}
@@ -102,7 +102,8 @@ func DeleteRecord(table *database.Table, conds []*database.Condition) {
 		data := block.Data
 		res := getRecord(table, data, pc.second)
 		updateIndex(table, res, 1, 0)
-		data[pc.second] = 0
+		copy(block.Data[pc.second:table.Size() + pc.second],make([]byte, table.Size() + pc.second))
+		block.IsDirty = true
 		buffer.BRelease(block)
 	}
 }

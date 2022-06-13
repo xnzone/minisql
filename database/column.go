@@ -25,9 +25,9 @@ func (b *Column) Size() int {
 	case constant.Float:
 		return 4
 	case constant.String:
-		return b.CharSize + 1
+		return b.CharSize
 	default:
-		return b.CharSize + 1
+		return b.CharSize
 	}
 }
 

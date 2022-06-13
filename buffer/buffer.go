@@ -98,6 +98,8 @@ func bread(fileName string, bid int) *Block {
 	if exist {
 		bp := val.(*Block)
 		if bp != nil && bp.UpToDate {
+			bp.IsDirty = true
+			bp.RefCnt++
 			return bp
 		}
 	}

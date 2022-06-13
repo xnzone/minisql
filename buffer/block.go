@@ -23,6 +23,6 @@ func NewBlock(fileName string, bid int) *Block {
 		UpToDate: false,
 		FileName: fileName,
 		Bid:      bid,
-		RefCnt:   0,
+		RefCnt:   1,
 	}
 }
