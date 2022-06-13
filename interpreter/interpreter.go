@@ -31,7 +31,7 @@ func (b *Interpreter) Run() {
 
 func getCmdStr() string {
 	var cmd string
-	fmt.Println("MiniSQL>")
+	fmt.Print("MiniSQL>")
 	ir := bufio.NewReader(os.Stdin)
 	for {
 		b, _ := ir.ReadSlice('\n')

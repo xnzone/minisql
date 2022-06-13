@@ -5,8 +5,6 @@ import (
 	"github.com/xnzone/minisql/lru"
 	"io"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -19,24 +17,26 @@ func Init() {
 }
 
 func timeoutFunc(key, value interface{}) {
-	strs := strings.Split(key.(string), "-")
-	fileName := strs[0]
-	bid, _ := strconv.ParseInt(strs[1], 10, 64)
-	BRelease(fileName, int(bid))
-}
-
-func BAddr(fileName string, bid int) []byte {
-	bp := bread(fileName, bid)
-	return bp.Data
-}
-
-func BRelease(fileName string, bid int) {
-	key := fileNameKey(fileName, bid)
-	val, _, exist := blockCache.Get(key)
-	if !exist {
+	if value == nil {
 		return
 	}
-	bp := val.(*Block)
+	bp := value.(*Block)
+	if bp == nil {
+		return
+	}
+	BRelease(bp)
+}
+
+func BAddr(fileName string, bid int) *Block {
+	bp := bread(fileName, bid)
+	if bp == nil {
+		bp = NewBlock(fileName, bid)
+		blockCache.Set(fileNameKey(fileName, bid), bp, 0)
+	}
+	return bp
+}
+
+func BRelease(bp *Block) {
 	if bp == nil {
 		return
 	}
@@ -101,9 +101,7 @@ func bread(fileName string, bid int) *Block {
 			return bp
 		}
 	}
-	bp := NewBlock()
-	bp.Bid = bid
-	bp.FileName = fileName
+	bp := NewBlock(fileName, bid)
 	blockCache.Set(key, bp, 0)
 
 	fname := fileNameData(fileName)

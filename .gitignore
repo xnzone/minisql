@@ -2,3 +2,5 @@
 *.iml
 go.sum
 bin
+*.minisql
+*.data

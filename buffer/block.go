@@ -15,14 +15,14 @@ type Block struct {
 	RefCnt   int
 }
 
-func NewBlock() *Block {
+func NewBlock(fileName string, bid int) *Block {
 	return &Block{
 		Data:     make([]byte, BlockSize, BlockSize),
 		IsDirty:  false,
 		IsPinned: false,
 		UpToDate: false,
-		FileName: "",
-		Bid:      0,
+		FileName: fileName,
+		Bid:      bid,
 		RefCnt:   0,
 	}
 }

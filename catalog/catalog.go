@@ -54,6 +54,7 @@ func NewTable(tableName string, columns []*database.Column) {
 		CMaps:     make(map[string]int),
 	}
 	cm.tables[tableName] = table
+	cm.save()
 }
 
 func ExistIndex(indexName string) bool {
