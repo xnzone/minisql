@@ -72,6 +72,7 @@ func InsertRecord(table *database.Table, values []constant.Value) {
 		if data[offset] == 0 && offset+size <= buffer.BlockSize {
 			putRecord(table, values, data, offset)
 			updateIndex(table, values, 0, (blockCnt-1)*table.Rib()+offset/size)
+			block.IsDirty = true
 			buffer.BRelease(block)
 			return
 		}
@@ -83,6 +84,7 @@ func InsertRecord(table *database.Table, values []constant.Value) {
 	data = block.Data
 	putRecord(table, values, data, 0)
 	updateIndex(table, values, 0, (table.BlockCnt-1)*table.Rib())
+	block.IsDirty = true
 	buffer.BRelease(block)
 }
 
@@ -102,7 +104,7 @@ func DeleteRecord(table *database.Table, conds []*database.Condition) {
 		data := block.Data
 		res := getRecord(table, data, pc.second)
 		updateIndex(table, res, 1, 0)
-		copy(block.Data[pc.second:table.Size() + pc.second],make([]byte, table.Size() + pc.second))
+		copy(block.Data[pc.second:table.Size()+pc.second], make([]byte, table.Size()+1+pc.second))
 		block.IsDirty = true
 		buffer.BRelease(block)
 	}

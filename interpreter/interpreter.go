@@ -151,11 +151,11 @@ func handleSpecial(b []byte) []byte {
 	nb := make([]byte, 0, len(b))
 	for i := 0; i < len(b); i++ {
 		if b[i] == '*' || b[i] == '=' || b[i] == ',' || b[i] == '(' || b[i] == ')' || b[i] == '<' || b[i] == '>' || b[i] == ';' {
-			if i > 0 && i < len(b)-1 && b[i-1] != ' ' && b[i+1] != ' ' && nb[len(nb) - 1] != ' ' {
+			if i > 0 && i < len(b)-1 && b[i-1] != ' ' && b[i+1] != ' ' && nb[len(nb)-1] != ' ' {
 				nb = append(nb, []byte{' ', b[i], ' '}...)
 				continue
 			}
-			if i > 0 && b[i-1] != ' ' && nb[len(nb) - 1] != ' '  {
+			if i > 0 && b[i-1] != ' ' && nb[len(nb)-1] != ' ' {
 				nb = append(nb, []byte{' ', b[i]}...)
 				continue
 			}

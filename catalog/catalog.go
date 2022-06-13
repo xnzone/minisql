@@ -68,13 +68,14 @@ func NewIndex(indexName, tableName, columnName string) {
 		ColumnName: columnName,
 	}
 	table := cm.tables[tableName]
-	index := table.IndexOfColumn(columnName)
-	column := table.Columns[index]
+	idx := table.IndexOfColumn(columnName)
+	column := table.Columns[idx]
 	column.Index = indexName
 }
 
 func DropTable(tableName string) {
 	delete(cm.tables, tableName)
+	cm.save()
 }
 
 func GetIndex(indexName string) *database.Index {
@@ -82,11 +83,12 @@ func GetIndex(indexName string) *database.Index {
 }
 
 func DropIndex(indexName string) {
-	index := cm.indices[indexName]
+	idx := cm.indices[indexName]
 	defer delete(cm.indices, indexName)
-	table := cm.tables[index.TableName]
-	ioc := table.IndexOfColumn(index.ColumnName)
+	table := cm.tables[idx.TableName]
+	ioc := table.IndexOfColumn(idx.ColumnName)
 	table.Columns[ioc].Index = ""
+	cm.save()
 }
 
 func ValidName(name string) bool {

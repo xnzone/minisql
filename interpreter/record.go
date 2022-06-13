@@ -77,7 +77,7 @@ func parseDelete(strvec []string) error {
 	}
 
 	table := api.GetTable(tableName)
-	for i := 5; i < vecSize - 1; {
+	for i := 5; i < vecSize-1; {
 		var cond *database.Condition
 		var err error
 		cond, i, err = handleColumnCond(table, strvec, i)
@@ -126,7 +126,7 @@ func parseSelect(strvec []string) error {
 	}
 
 	table := api.GetTable(tableName)
-	for i := 6; i < vecSize - 1; {
+	for i := 6; i < vecSize-1; {
 		var cond *database.Condition
 		var err error
 		cond, i, err = handleColumnCond(table, strvec, i)

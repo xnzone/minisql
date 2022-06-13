@@ -175,7 +175,7 @@ func GetTable(tableName string) *database.Table {
 }
 
 func primaryIndexName(tableName string) string {
-	return fmt.Sprintf("%s_Primary", tableName)
+	return fmt.Sprintf("%s_primary", tableName)
 }
 
 func printRecord(columns []*database.Column, result [][]constant.Value) {
